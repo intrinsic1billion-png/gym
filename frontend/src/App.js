@@ -21,6 +21,7 @@ import { PaymentMethods } from "./components/TrustBadges";
 import { Toaster } from "./components/ui/sonner";
 import AdminRoute from "./components/AdminRoute";
 import LiveVisitorCounter from "./components/LiveVisitorCounter";
+import { PageSEO } from "./components/SEO";
 
 // Lazy load pages for better performance
 const Products = lazy(() => import("./pages/Products"));
@@ -65,6 +66,7 @@ const Home = () => {
 
   return (
     <div className="landing-page">
+      <PageSEO.home />
       <Header />
       <main className="landing-content">
         <Hero onEarlyAccessClick={handleEarlyAccessClick} />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -18,7 +18,21 @@ import {
   DollarSign,
   Gift,
   Calendar,
-  Target
+  Target,
+  Download,
+  Search,
+  Eye,
+  Package,
+  Activity,
+  Tag,
+  AlertCircle,
+  Copy,
+  MessageSquare,
+  RotateCcw,
+  Shuffle,
+  FileText,
+  CheckSquare,
+  Square
 } from 'lucide-react';
 import {
   AreaChart,
@@ -58,6 +72,27 @@ const AdminDashboard = () => {
   const [contactsSummary, setContactsSummary] = useState(null);
   const [analyticsData, setAnalyticsData] = useState(null);
   
+  // New feature states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [filterDiscipline, setFilterDiscipline] = useState('all');
+  const [filterSource, setFilterSource] = useState('all');
+  const [customDateStart, setCustomDateStart] = useState('');
+  const [customDateEnd, setCustomDateEnd] = useState('');
+  const [selectedContacts, setSelectedContacts] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [userDetails, setUserDetails] = useState(null);
+  const [inventory, setInventory] = useState([]);
+  const [activityLog, setActivityLog] = useState([]);
+  const [discountCodes, setDiscountCodes] = useState([]);
+  const [emailLogs, setEmailLogs] = useState([]);
+  const [emailLogsSummary, setEmailLogsSummary] = useState(null);
+  const [duplicates, setDuplicates] = useState([]);
+  const [newNote, setNewNote] = useState('');
+  const [giveawayWinner, setGiveawayWinner] = useState(null);
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [newDiscountCode, setNewDiscountCode] = useState({ code: '', discount_percent: 10, max_uses: 0 });
+  
   // Email form state
   const [emailForm, setEmailForm] = useState({
     subject: '',
@@ -72,13 +107,25 @@ const AdminDashboard = () => {
     { value: '7d', label: 'Last 7 Days' },
     { value: '30d', label: 'Last 30 Days' },
     { value: '90d', label: 'Last 90 Days' },
-    { value: 'all', label: 'All Time' }
+    { value: 'all', label: 'All Time' },
+    { value: 'custom', label: 'Custom Range' }
   ];
 
   // Check if already authenticated
   useEffect(() => {
     checkAuth();
   }, [user]);
+  
+  // Auto-refresh effect
+  useEffect(() => {
+    let interval;
+    if (autoRefresh && isAuthenticated) {
+      interval = setInterval(() => {
+        loadStats();
+      }, 30000); // Refresh every 30 seconds
+    }
+    return () => clearInterval(interval);
+  }, [autoRefresh, isAuthenticated]);
 
   const checkAuth = async () => {
     // If user is logged in and is admin, auto-authenticate immediately
@@ -340,6 +387,276 @@ const AdminDashboard = () => {
     setLoading(false);
   };
 
+  // ============== NEW FEATURE FUNCTIONS ==============
+  
+  // Export to CSV
+  const exportToCSV = async () => {
+    try {
+      window.open(`${API_URL}/api/admin/export/contacts`, '_blank');
+    } catch (error) {
+      console.error('Failed to export:', error);
+    }
+  };
+
+  // Search contacts
+  const searchContacts = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (searchQuery) params.append('q', searchQuery);
+      if (filterDiscipline !== 'all') params.append('discipline', filterDiscipline);
+      if (filterSource !== 'all') params.append('source', filterSource);
+      if (customDateStart) params.append('start_date', customDateStart);
+      if (customDateEnd) params.append('end_date', customDateEnd);
+      
+      const res = await fetch(`${API_URL}/api/admin/search?${params}`, {
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      setSearchResults(data.results || []);
+    } catch (error) {
+      console.error('Failed to search:', error);
+    }
+    setLoading(false);
+  };
+
+  // Pick giveaway winner
+  const pickGiveawayWinner = async () => {
+    if (!window.confirm('Pick a random giveaway winner?')) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/giveaway/pick-winner`, {
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      if (data.success) {
+        setGiveawayWinner(data.winner);
+        alert(`Winner: ${data.winner.email}\nTotal entries: ${data.total_entries}`);
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error('Failed to pick winner:', error);
+    }
+    setLoading(false);
+  };
+
+  // Get user details
+  const loadUserDetails = async (email) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/user/${encodeURIComponent(email)}/details`, {
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      setUserDetails(data);
+      setSelectedUser(email);
+    } catch (error) {
+      console.error('Failed to load user details:', error);
+    }
+    setLoading(false);
+  };
+
+  // Load inventory
+  const loadInventory = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/inventory`, {
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      setInventory(data.inventory || []);
+    } catch (error) {
+      console.error('Failed to load inventory:', error);
+    }
+    setLoading(false);
+  };
+
+  // Update inventory
+  const updateInventory = async (productId, size, quantity) => {
+    try {
+      await fetch(`${API_URL}/api/admin/inventory/${productId}?size=${size}&quantity=${quantity}`, {
+        method: 'PUT',
+        headers: getAuthHeaders()
+      });
+      loadInventory();
+    } catch (error) {
+      console.error('Failed to update inventory:', error);
+    }
+  };
+
+  // Delete contact
+  const deleteContact = async (email) => {
+    if (!window.confirm(`Delete ALL data for ${email}? This cannot be undone.`)) return;
+    try {
+      await fetch(`${API_URL}/api/admin/contact/${encodeURIComponent(email)}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      loadAllContacts();
+    } catch (error) {
+      console.error('Failed to delete contact:', error);
+    }
+  };
+
+  // Bulk delete
+  const bulkDeleteContacts = async () => {
+    if (selectedContacts.length === 0) return;
+    if (!window.confirm(`Delete ${selectedContacts.length} contacts? This cannot be undone.`)) return;
+    
+    try {
+      await fetch(`${API_URL}/api/admin/bulk-delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify({ emails: selectedContacts })
+      });
+      setSelectedContacts([]);
+      loadAllContacts();
+    } catch (error) {
+      console.error('Failed to bulk delete:', error);
+    }
+  };
+
+  // Toggle contact selection
+  const toggleContactSelection = (email) => {
+    setSelectedContacts(prev => 
+      prev.includes(email) 
+        ? prev.filter(e => e !== email)
+        : [...prev, email]
+    );
+  };
+
+  // Select all contacts
+  const selectAllContacts = () => {
+    if (selectedContacts.length === allContacts.length) {
+      setSelectedContacts([]);
+    } else {
+      setSelectedContacts(allContacts.map(c => c.email));
+    }
+  };
+
+  // Load activity log
+  const loadActivityLog = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/activity-log?limit=100`, {
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      setActivityLog(data.logs || []);
+    } catch (error) {
+      console.error('Failed to load activity log:', error);
+    }
+    setLoading(false);
+  };
+
+  // Load discount codes
+  const loadDiscountCodes = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/discount-codes`, {
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      setDiscountCodes(data.codes || []);
+    } catch (error) {
+      console.error('Failed to load discount codes:', error);
+    }
+    setLoading(false);
+  };
+
+  // Create discount code
+  const createDiscountCode = async () => {
+    if (!newDiscountCode.code) return;
+    try {
+      await fetch(`${API_URL}/api/admin/discount-codes?code=${newDiscountCode.code}&discount_percent=${newDiscountCode.discount_percent}&max_uses=${newDiscountCode.max_uses}`, {
+        method: 'POST',
+        headers: getAuthHeaders()
+      });
+      setNewDiscountCode({ code: '', discount_percent: 10, max_uses: 0 });
+      loadDiscountCodes();
+    } catch (error) {
+      console.error('Failed to create discount code:', error);
+    }
+  };
+
+  // Load email logs
+  const loadEmailLogs = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/email-logs?limit=200`, {
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      setEmailLogs(data.logs || []);
+      setEmailLogsSummary(data.summary || null);
+    } catch (error) {
+      console.error('Failed to load email logs:', error);
+    }
+    setLoading(false);
+  };
+
+  // Load duplicates
+  const loadDuplicates = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/duplicates`, {
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      setDuplicates(data.duplicates || []);
+    } catch (error) {
+      console.error('Failed to load duplicates:', error);
+    }
+    setLoading(false);
+  };
+
+  // Merge duplicates
+  const mergeDuplicates = async (email) => {
+    if (!window.confirm(`Merge duplicate entries for ${email}?`)) return;
+    try {
+      await fetch(`${API_URL}/api/admin/merge-duplicates?email=${encodeURIComponent(email)}`, {
+        method: 'POST',
+        headers: getAuthHeaders()
+      });
+      loadDuplicates();
+    } catch (error) {
+      console.error('Failed to merge duplicates:', error);
+    }
+  };
+
+  // Add user note
+  const addUserNote = async (email) => {
+    if (!newNote.trim()) return;
+    try {
+      await fetch(`${API_URL}/api/admin/user/${encodeURIComponent(email)}/notes?note=${encodeURIComponent(newNote)}`, {
+        method: 'POST',
+        headers: getAuthHeaders()
+      });
+      setNewNote('');
+      loadUserDetails(email);
+    } catch (error) {
+      console.error('Failed to add note:', error);
+    }
+  };
+
+  // Resend email
+  const resendEmail = async (email, emailType = 'welcome') => {
+    if (!window.confirm(`Resend ${emailType} email to ${email}?`)) return;
+    try {
+      const res = await fetch(`${API_URL}/api/admin/resend-email/${encodeURIComponent(email)}?email_type=${emailType}`, {
+        method: 'POST',
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      alert(data.message);
+    } catch (error) {
+      console.error('Failed to resend email:', error);
+    }
+  };
+
+  // ============== END NEW FEATURE FUNCTIONS ==============
+
   const deleteSubscriber = async (email) => {
     if (!window.confirm(`Delete subscriber ${email}?`)) return;
     
@@ -427,6 +744,21 @@ const AdminDashboard = () => {
       case 'analytics':
         loadAnalytics();
         break;
+      case 'inventory':
+        loadInventory();
+        break;
+      case 'activity':
+        loadActivityLog();
+        break;
+      case 'discounts':
+        loadDiscountCodes();
+        break;
+      case 'email-logs':
+        loadEmailLogs();
+        break;
+      case 'duplicates':
+        loadDuplicates();
+        break;
       default:
         loadStats();
     }
@@ -471,9 +803,11 @@ const AdminDashboard = () => {
           { id: 'overview', label: 'Overview', icon: <ChevronDown size={18} /> },
           { id: 'contacts', label: 'All Contacts', icon: <Users size={18} /> },
           { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
-          { id: 'users', label: 'Signed Up', icon: <Users size={18} /> },
-          { id: 'subscribers', label: 'Subscribers', icon: <Mail size={18} /> },
-          { id: 'waitlist', label: 'Waitlist', icon: <Clock size={18} /> },
+          { id: 'inventory', label: 'Inventory', icon: <Package size={18} /> },
+          { id: 'discounts', label: 'Discounts', icon: <Tag size={18} /> },
+          { id: 'activity', label: 'Activity Log', icon: <Activity size={18} /> },
+          { id: 'email-logs', label: 'Email Status', icon: <AlertCircle size={18} /> },
+          { id: 'duplicates', label: 'Duplicates', icon: <Copy size={18} /> },
           { id: 'orders', label: 'Orders', icon: <ShoppingBag size={18} /> },
           { id: 'email', label: 'Send Email', icon: <Send size={18} /> }
         ].map(tab => (
@@ -663,9 +997,78 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            <button onClick={() => loadStats()} className="refresh-btn">
-              <RefreshCw size={16} /> Refresh Stats
-            </button>
+            {/* Action Buttons Row */}
+            <div className="action-buttons-row">
+              <button onClick={() => loadStats()} className="refresh-btn">
+                <RefreshCw size={16} /> Refresh Stats
+              </button>
+              <button onClick={pickGiveawayWinner} className="action-btn giveaway">
+                <Shuffle size={16} /> Pick Giveaway Winner
+              </button>
+              <label className="auto-refresh-toggle">
+                <input 
+                  type="checkbox" 
+                  checked={autoRefresh} 
+                  onChange={(e) => setAutoRefresh(e.target.checked)}
+                />
+                Auto-refresh (30s)
+              </label>
+            </div>
+
+            {/* Search & Filter Section */}
+            <div className="search-filter-section">
+              <h4><Search size={18} /> Search & Filter</h4>
+              <div className="search-row">
+                <input
+                  type="text"
+                  placeholder="Search by email or name..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="search-input"
+                />
+                <select value={filterDiscipline} onChange={(e) => setFilterDiscipline(e.target.value)} className="filter-select">
+                  <option value="all">All Disciplines</option>
+                  <option value="MAG">MAG</option>
+                  <option value="WAG">WAG</option>
+                </select>
+                <select value={filterSource} onChange={(e) => setFilterSource(e.target.value)} className="filter-select">
+                  <option value="all">All Sources</option>
+                  <option value="giveaway_popup">Giveaway</option>
+                  <option value="early_access">Early Access</option>
+                  <option value="waitlist">Waitlist</option>
+                </select>
+                <input type="date" value={customDateStart} onChange={(e) => setCustomDateStart(e.target.value)} className="date-input" />
+                <input type="date" value={customDateEnd} onChange={(e) => setCustomDateEnd(e.target.value)} className="date-input" />
+                <button onClick={searchContacts} className="search-btn">
+                  <Search size={16} /> Search
+                </button>
+              </div>
+              
+              {searchResults.length > 0 && (
+                <div className="search-results">
+                  <h5>Found {searchResults.length} results</h5>
+                  <div className="results-list">
+                    {searchResults.slice(0, 20).map((r, i) => (
+                      <div key={i} className="result-item" onClick={() => loadUserDetails(r.email)}>
+                        <span className="result-email">{r.email}</span>
+                        <span className={`discipline-badge ${(r.discipline || 'unknown').toLowerCase()}`}>{r.discipline}</span>
+                        <span className={`source-badge ${r.source}`}>{r.source}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Giveaway Winner Display */}
+            {giveawayWinner && (
+              <div className="giveaway-winner-card">
+                <h4>🎉 Giveaway Winner</h4>
+                <p className="winner-email">{giveawayWinner.email}</p>
+                <p className="winner-name">{giveawayWinner.name || 'No name provided'}</p>
+                <button onClick={() => setGiveawayWinner(null)} className="close-btn">×</button>
+              </div>
+            )}
           </div>
         )}
 
@@ -674,9 +1077,19 @@ const AdminDashboard = () => {
           <div className="admin-table-container">
             <div className="table-header">
               <h2>All Contacts ({allContacts.length})</h2>
-              <button onClick={loadAllContacts} className="refresh-btn">
-                <RefreshCw size={16} /> Refresh
-              </button>
+              <div className="header-actions">
+                <button onClick={exportToCSV} className="action-btn export">
+                  <Download size={16} /> Export CSV
+                </button>
+                {selectedContacts.length > 0 && (
+                  <button onClick={bulkDeleteContacts} className="action-btn delete">
+                    <Trash2 size={16} /> Delete ({selectedContacts.length})
+                  </button>
+                )}
+                <button onClick={loadAllContacts} className="refresh-btn">
+                  <RefreshCw size={16} /> Refresh
+                </button>
+              </div>
             </div>
             
             {/* Summary Cards */}
@@ -721,6 +1134,11 @@ const AdminDashboard = () => {
               <table className="admin-table enhanced">
                 <thead>
                   <tr>
+                    <th>
+                      <button onClick={selectAllContacts} className="select-all-btn">
+                        {selectedContacts.length === allContacts.length ? <CheckSquare size={16} /> : <Square size={16} />}
+                      </button>
+                    </th>
                     <th>Email</th>
                     <th>Name</th>
                     <th>Discipline</th>
@@ -732,11 +1150,17 @@ const AdminDashboard = () => {
                     <th>Orders</th>
                     <th>Cart</th>
                     <th>Date</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {allContacts.map((contact, i) => (
-                    <tr key={i}>
+                    <tr key={i} className={selectedContacts.includes(contact.email) ? 'selected' : ''}>
+                      <td>
+                        <button onClick={() => toggleContactSelection(contact.email)} className="select-btn">
+                          {selectedContacts.includes(contact.email) ? <CheckSquare size={16} /> : <Square size={16} />}
+                        </button>
+                      </td>
                       <td className="email-cell">{contact.email}</td>
                       <td>{contact.name || '-'}</td>
                       <td>
@@ -792,14 +1216,104 @@ const AdminDashboard = () => {
                         )}
                       </td>
                       <td>{contact.signup_date ? new Date(contact.signup_date).toLocaleDateString() : '-'}</td>
+                      <td>
+                        <div className="action-btns">
+                          <button onClick={() => loadUserDetails(contact.email)} className="action-btn-sm view" title="View Details">
+                            <Eye size={14} />
+                          </button>
+                          <button onClick={() => resendEmail(contact.email)} className="action-btn-sm resend" title="Resend Email">
+                            <RotateCcw size={14} />
+                          </button>
+                          <button onClick={() => deleteContact(contact.email)} className="action-btn-sm delete" title="Delete">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                   {allContacts.length === 0 && (
-                    <tr><td colSpan="11" className="empty-row">No contacts found</td></tr>
+                    <tr><td colSpan="13" className="empty-row">No contacts found</td></tr>
                   )}
                 </tbody>
               </table>
             </div>
+
+            {/* User Detail Modal */}
+            {selectedUser && userDetails && (
+              <div className="user-detail-modal">
+                <div className="modal-content">
+                  <button onClick={() => setSelectedUser(null)} className="close-modal">×</button>
+                  <h3>User Details: {selectedUser}</h3>
+                  
+                  {userDetails.user && (
+                    <div className="detail-section">
+                      <h4>Account Info</h4>
+                      <p><strong>Name:</strong> {userDetails.user.name || '-'}</p>
+                      <p><strong>Discipline:</strong> {userDetails.user.discipline || '-'}</p>
+                      <p><strong>Auth:</strong> {userDetails.user.auth_provider || '-'}</p>
+                      <p><strong>Joined:</strong> {new Date(userDetails.user.created_at).toLocaleString()}</p>
+                    </div>
+                  )}
+                  
+                  <div className="detail-section">
+                    <h4>Subscriptions ({userDetails.subscriptions?.length || 0})</h4>
+                    {userDetails.subscriptions?.map((s, i) => (
+                      <span key={i} className={`source-badge ${s.source}`}>{s.source}</span>
+                    ))}
+                  </div>
+                  
+                  <div className="detail-section">
+                    <h4>Waitlist ({userDetails.waitlist?.length || 0})</h4>
+                    {userDetails.waitlist?.map((w, i) => (
+                      <p key={i}>{w.product_name} - {w.size}</p>
+                    ))}
+                  </div>
+                  
+                  <div className="detail-section">
+                    <h4>Orders ({userDetails.orders?.length || 0})</h4>
+                    {userDetails.orders?.map((o, i) => (
+                      <p key={i}>Order #{o.order_id?.slice(0,8)} - ${o.total}</p>
+                    ))}
+                  </div>
+                  
+                  <div className="detail-section">
+                    <h4>Notes</h4>
+                    {userDetails.notes?.map((n, i) => (
+                      <div key={i} className="note-item">
+                        <p>{n.note}</p>
+                        <small>{new Date(n.created_at).toLocaleString()}</small>
+                      </div>
+                    ))}
+                    <div className="add-note">
+                      <input 
+                        type="text" 
+                        placeholder="Add a note..." 
+                        value={newNote}
+                        onChange={(e) => setNewNote(e.target.value)}
+                      />
+                      <button onClick={() => addUserNote(selectedUser)}>
+                        <MessageSquare size={14} /> Add
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="detail-section">
+                    <h4>Email History</h4>
+                    {userDetails.email_logs?.slice(0,5).map((e, i) => (
+                      <p key={i} className={`email-log-item ${e.status}`}>
+                        {e.email_type} - {e.status} - {new Date(e.sent_at).toLocaleDateString()}
+                      </p>
+                    ))}
+                  </div>
+                  
+                  <div className="modal-actions">
+                    <button onClick={() => resendEmail(selectedUser, 'welcome')} className="action-btn">
+                      <RotateCcw size={14} /> Resend Welcome
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -1214,6 +1728,262 @@ const AdminDashboard = () => {
                   )}
                 </div>
               </div>
+            )}
+          </div>
+        )}
+
+        {/* Inventory Tab */}
+        {activeTab === 'inventory' && (
+          <div className="admin-table-container">
+            <div className="table-header">
+              <h2>Inventory Management</h2>
+              <button onClick={loadInventory} className="refresh-btn">
+                <RefreshCw size={16} /> Refresh
+              </button>
+            </div>
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Color</th>
+                  <th>Size</th>
+                  <th>Quantity</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {inventory.map((item, i) => (
+                  <tr key={i} className={item.quantity <= (item.low_stock_threshold || 5) ? 'low-stock' : ''}>
+                    <td>{item.product_name}</td>
+                    <td>{item.color}</td>
+                    <td>{item.size}</td>
+                    <td>
+                      <input 
+                        type="number" 
+                        value={item.quantity} 
+                        onChange={(e) => updateInventory(item.product_id, item.size, parseInt(e.target.value))}
+                        className="inventory-input"
+                        min="0"
+                      />
+                    </td>
+                    <td>
+                      {item.quantity <= (item.low_stock_threshold || 5) && (
+                        <span className="low-stock-badge">Low Stock!</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Activity Log Tab */}
+        {activeTab === 'activity' && (
+          <div className="admin-table-container">
+            <div className="table-header">
+              <h2>Activity Log</h2>
+              <button onClick={loadActivityLog} className="refresh-btn">
+                <RefreshCw size={16} /> Refresh
+              </button>
+            </div>
+            <div className="activity-log-list">
+              {activityLog.map((log, i) => (
+                <div key={i} className="activity-item">
+                  <span className={`activity-badge ${log.action}`}>{log.action}</span>
+                  <span className="activity-details">
+                    {log.email && <strong>{log.email}</strong>}
+                    {log.winner_email && <strong>Winner: {log.winner_email}</strong>}
+                    {log.product_id && <span>Product #{log.product_id}</span>}
+                  </span>
+                  <span className="activity-time">{new Date(log.timestamp).toLocaleString()}</span>
+                </div>
+              ))}
+              {activityLog.length === 0 && <p className="empty-message">No activity recorded yet</p>}
+            </div>
+          </div>
+        )}
+
+        {/* Discount Codes Tab */}
+        {activeTab === 'discounts' && (
+          <div className="admin-table-container">
+            <div className="table-header">
+              <h2>Discount Codes</h2>
+              <button onClick={loadDiscountCodes} className="refresh-btn">
+                <RefreshCw size={16} /> Refresh
+              </button>
+            </div>
+            
+            <div className="create-discount-form">
+              <h4>Create New Code</h4>
+              <div className="form-row">
+                <input 
+                  type="text" 
+                  placeholder="CODE" 
+                  value={newDiscountCode.code}
+                  onChange={(e) => setNewDiscountCode({...newDiscountCode, code: e.target.value.toUpperCase()})}
+                />
+                <input 
+                  type="number" 
+                  placeholder="% Off" 
+                  value={newDiscountCode.discount_percent}
+                  onChange={(e) => setNewDiscountCode({...newDiscountCode, discount_percent: parseInt(e.target.value)})}
+                  min="1" max="100"
+                />
+                <input 
+                  type="number" 
+                  placeholder="Max Uses (0=unlimited)" 
+                  value={newDiscountCode.max_uses}
+                  onChange={(e) => setNewDiscountCode({...newDiscountCode, max_uses: parseInt(e.target.value)})}
+                  min="0"
+                />
+                <button onClick={createDiscountCode} className="action-btn">Create</button>
+              </div>
+            </div>
+            
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Discount</th>
+                  <th>Max Uses</th>
+                  <th>Times Used</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                {discountCodes.map((code, i) => (
+                  <tr key={i}>
+                    <td><strong>{code.code}</strong></td>
+                    <td>{code.discount_percent}%</td>
+                    <td>{code.max_uses || 'Unlimited'}</td>
+                    <td>{code.usage_count || 0}</td>
+                    <td>
+                      <span className={`status-badge ${code.active ? 'active' : 'inactive'}`}>
+                        {code.active ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td>{new Date(code.created_at).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+                {discountCodes.length === 0 && (
+                  <tr><td colSpan="6" className="empty-row">No discount codes yet</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Email Logs Tab */}
+        {activeTab === 'email-logs' && (
+          <div className="admin-table-container">
+            <div className="table-header">
+              <h2>Email Delivery Status</h2>
+              <button onClick={loadEmailLogs} className="refresh-btn">
+                <RefreshCw size={16} /> Refresh
+              </button>
+            </div>
+            
+            {emailLogsSummary && (
+              <div className="email-summary">
+                <div className="summary-card">
+                  <span className="summary-number">{emailLogsSummary.total_sent}</span>
+                  <span className="summary-label">Total Sent</span>
+                </div>
+                <div className="summary-card delivered">
+                  <span className="summary-number">{emailLogsSummary.delivered}</span>
+                  <span className="summary-label">Delivered</span>
+                </div>
+                <div className="summary-card bounced">
+                  <span className="summary-number">{emailLogsSummary.bounced}</span>
+                  <span className="summary-label">Bounced</span>
+                </div>
+                <div className="summary-card failed">
+                  <span className="summary-number">{emailLogsSummary.failed}</span>
+                  <span className="summary-label">Failed</span>
+                </div>
+              </div>
+            )}
+            
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Recipient</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Sent At</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {emailLogs.map((log, i) => (
+                  <tr key={i}>
+                    <td>{log.recipient}</td>
+                    <td>{log.email_type}</td>
+                    <td>
+                      <span className={`status-badge ${log.status}`}>{log.status}</span>
+                    </td>
+                    <td>{new Date(log.sent_at).toLocaleString()}</td>
+                    <td>
+                      {(log.status === 'bounced' || log.status === 'failed') && (
+                        <button onClick={() => resendEmail(log.recipient, log.email_type)} className="action-btn-sm resend">
+                          <RotateCcw size={14} /> Retry
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {emailLogs.length === 0 && (
+                  <tr><td colSpan="5" className="empty-row">No email logs yet</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Duplicates Tab */}
+        {activeTab === 'duplicates' && (
+          <div className="admin-table-container">
+            <div className="table-header">
+              <h2>Duplicate Detection ({duplicates.length})</h2>
+              <button onClick={loadDuplicates} className="refresh-btn">
+                <RefreshCw size={16} /> Refresh
+              </button>
+            </div>
+            
+            {duplicates.length === 0 ? (
+              <div className="no-duplicates">
+                <Check size={48} />
+                <p>No duplicates found! Your data is clean.</p>
+              </div>
+            ) : (
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Email</th>
+                    <th>User Entries</th>
+                    <th>Subscription Entries</th>
+                    <th>Waitlist Entries</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {duplicates.map((dup, i) => (
+                    <tr key={i}>
+                      <td>{dup.email}</td>
+                      <td>{dup.counts.user}</td>
+                      <td>{dup.counts.subscription}</td>
+                      <td>{dup.counts.waitlist}</td>
+                      <td>
+                        <button onClick={() => mergeDuplicates(dup.email)} className="action-btn merge">
+                          <Copy size={14} /> Merge
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
           </div>
         )}
