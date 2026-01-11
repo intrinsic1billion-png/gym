@@ -1,4 +1,4 @@
-import React, { useState, lazy, Suspense } from "react";
+import React, { useState, lazy, Suspense, useEffect } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
@@ -22,6 +22,10 @@ import { Toaster } from "./components/ui/sonner";
 import AdminRoute from "./components/AdminRoute";
 import LiveVisitorCounter from "./components/LiveVisitorCounter";
 import { PageSEO } from "./components/SEO";
+import { initGA, trackPageView, getVisitorInfo } from "./utils/analytics";
+import axios from "axios";
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
 
 // Lazy load pages for better performance
 const Products = lazy(() => import("./pages/Products"));
