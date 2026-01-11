@@ -1320,6 +1320,27 @@ const AdminDashboard = () => {
         {/* Analytics Tab */}
         {activeTab === 'analytics' && analyticsData && (
           <div className="admin-analytics">
+            {/* Link to Comprehensive Analytics */}
+            <div style={{ marginBottom: '20px' }}>
+              <a 
+                href="/admin/analytics" 
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-block',
+                  padding: '12px 24px',
+                  background: 'linear-gradient(135deg, #00d9ff 0%, #0095ff 100%)',
+                  color: '#fff',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  fontWeight: '600',
+                  transition: 'all 0.3s'
+                }}
+              >
+                📊 Open Advanced Analytics Dashboard (GA4 + Visitor Tracking)
+              </a>
+            </div>
+            
             {/* Top Stats Row */}
             <div className="analytics-stats-row">
               <div className="analytics-stat-card revenue">
