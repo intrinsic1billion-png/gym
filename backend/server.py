@@ -225,6 +225,97 @@ class AdminStatsResponse(BaseModel):
     total_orders: int
     total_waitlist: int
 
+
+# Analytics & Visitor Tracking Models
+class VisitorSession(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    session_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: Optional[str] = None  # If logged in
+    user_email: Optional[str] = None  # If logged in
+    user_type: str = "guest"  # "guest", "registered", "admin"
+    
+    # Location data
+    ip_address: Optional[str] = None
+    country: Optional[str] = None
+    country_code: Optional[str] = None
+    region: Optional[str] = None
+    city: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    timezone: Optional[str] = None
+    
+    # Device & Browser info
+    user_agent: Optional[str] = None
+    device_type: Optional[str] = None  # "mobile", "tablet", "desktop"
+    browser: Optional[str] = None
+    os: Optional[str] = None
+    screen_resolution: Optional[str] = None
+    language: Optional[str] = None
+    
+    # Traffic source
+    referrer: Optional[str] = None
+    utm_source: Optional[str] = None
+    utm_medium: Optional[str] = None
+    utm_campaign: Optional[str] = None
+    
+    # Session tracking
+    landing_page: Optional[str] = None
+    pages_viewed: List[str] = []
+    events: List[Dict] = []
+    first_visit: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_activity: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    session_duration: int = 0  # seconds
+    is_active: bool = True
+
+class VisitorHeartbeat(BaseModel):
+    session_id: str
+    current_page: str
+    user_id: Optional[str] = None
+
+class PageView(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    session_id: str
+    user_id: Optional[str] = None
+    page_path: str
+    page_title: Optional[str] = None
+    referrer: Optional[str] = None
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    time_on_page: int = 0  # seconds
+
+class AnalyticsEvent(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    session_id: str
+    user_id: Optional[str] = None
+    event_type: str  # "signup", "add_to_cart", "begin_checkout", "purchase", etc.
+    event_category: Optional[str] = None
+    event_label: Optional[str] = None
+    event_value: Optional[float] = None
+    event_data: Optional[Dict] = None
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ConversionFunnel(BaseModel):
+    visitor_count: int
+    cart_additions: int
+    checkout_started: int
+    purchases: int
+    conversion_rate: float
+
+class AnalyticsOverview(BaseModel):
+    total_visitors: int
+    unique_visitors: int
+    registered_users: int
+    guest_visitors: int
+    active_sessions: int
+    total_page_views: int
+    avg_session_duration: float
+    top_pages: List[Dict]
+    top_countries: List[Dict]
+    traffic_sources: List[Dict]
+    conversion_funnel: ConversionFunnel
+
 # Waitlist Models
 class SizeSelection(BaseModel):
     size: str
