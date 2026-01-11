@@ -95,6 +95,106 @@ const Home = () => {
   );
 };
 
+// Visitor Tracking Component - Initializes GA4 and tracks visitors
+const VisitorTracker = () => {
+  const location = useLocation();
+  const [sessionId, setSessionId] = useState(null);
+
+  // Initialize GA4 on mount
+  useEffect(() => {
+    initGA();
+  }, []);
+
+  // Track visitor session on first load
+  useEffect(() => {
+    const trackVisitor = async () => {
+      try {
+        // Get visitor info
+        const visitorInfo = await getVisitorInfo();
+        
+        // Get URL parameters (utm_source, utm_medium, etc.)
+        const urlParams = new URLSearchParams(window.location.search);
+        const utmSource = urlParams.get('utm_source');
+        const utmMedium = urlParams.get('utm_medium');
+        const utmCampaign = urlParams.get('utm_campaign');
+        
+        // Track visitor
+        const response = await axios.post(
+          `${BACKEND_URL}/api/visitors/track`,
+          {
+            ...visitorInfo,
+            landing_page: window.location.pathname,
+            utm_source: utmSource,
+            utm_medium: utmMedium,
+            utm_campaign: utmCampaign,
+          },
+          { withCredentials: true }
+        );
+        
+        if (response.data.success) {
+          setSessionId(response.data.session_id);
+          localStorage.setItem('visitor_session_id', response.data.session_id);
+        }
+      } catch (error) {
+        console.error('Error tracking visitor:', error);
+      }
+    };
+
+    // Check if session already exists
+    const existingSession = localStorage.getItem('visitor_session_id');
+    if (existingSession) {
+      setSessionId(existingSession);
+    } else {
+      trackVisitor();
+    }
+  }, []);
+
+  // Track page views on route change
+  useEffect(() => {
+    const currentSessionId = sessionId || localStorage.getItem('visitor_session_id');
+    
+    if (currentSessionId) {
+      // Track page view in GA4
+      trackPageView(location.pathname, document.title);
+      
+      // Track page view in backend
+      axios.post(
+        `${BACKEND_URL}/api/analytics/pageview`,
+        {
+          session_id: currentSessionId,
+          page_path: location.pathname,
+          page_title: document.title,
+          referrer: document.referrer,
+        },
+        { withCredentials: true }
+      ).catch(err => console.error('Error tracking pageview:', err));
+    }
+  }, [location, sessionId]);
+
+  // Send heartbeat every 30 seconds
+  useEffect(() => {
+    const currentSessionId = sessionId || localStorage.getItem('visitor_session_id');
+    
+    if (!currentSessionId) return;
+
+    const heartbeatInterval = setInterval(() => {
+      axios.post(
+        `${BACKEND_URL}/api/visitors/heartbeat`,
+        {
+          session_id: currentSessionId,
+          current_page: location.pathname,
+        },
+        { withCredentials: true }
+      ).catch(err => console.error('Error sending heartbeat:', err));
+    }, 30000); // Every 30 seconds
+
+    return () => clearInterval(heartbeatInterval);
+  }, [sessionId, location]);
+
+  return null; // This component doesn't render anything
+};
+
+
 // Router wrapper to handle auth callback detection
 const AppRouter = () => {
   const location = useLocation();
