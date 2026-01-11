@@ -132,6 +132,7 @@ const AppRouter = () => {
         <Route path="/unsubscribe" element={<Unsubscribe />} />
         <Route path="/admin" element={<AdminRoute><><Header /><AdminDashboard /><Footer /></></AdminRoute>} />
         <Route path="/admin/orders" element={<AdminRoute><><Header /><AdminDashboard /><Footer /></></AdminRoute>} />
+        <Route path="/admin/analytics" element={<AdminRoute><><Header /><AnalyticsDashboard /><Footer /></></AdminRoute>} />
       </Routes>
     </Suspense>
     </>
