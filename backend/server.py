@@ -1271,6 +1271,434 @@ async def mark_upsell_sent(request: Request):
     }
 
 
+
+# ============================================
+# ANALYTICS & VISITOR TRACKING ROUTES
+# ============================================
+
+# Helper function to get IP-based location
+async def get_location_from_ip(ip_address: str) -> dict:
+    """Get location data from IP address using ipapi.co (free tier)"""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"https://ipapi.co/{ip_address}/json/", timeout=5.0)
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    "country": data.get("country_name"),
+                    "country_code": data.get("country_code"),
+                    "region": data.get("region"),
+                    "city": data.get("city"),
+                    "latitude": data.get("latitude"),
+                    "longitude": data.get("longitude"),
+                    "timezone": data.get("timezone"),
+                }
+    except Exception as e:
+        logging.error(f"IP geolocation error: {str(e)}")
+    return {}
+
+# Parse user agent for device/browser info
+def parse_user_agent(user_agent: str) -> dict:
+    """Extract device, browser, and OS from user agent string"""
+    ua_lower = user_agent.lower()
+    
+    # Device type
+    device_type = "desktop"
+    if "mobile" in ua_lower or "android" in ua_lower or "iphone" in ua_lower:
+        device_type = "mobile"
+    elif "tablet" in ua_lower or "ipad" in ua_lower:
+        device_type = "tablet"
+    
+    # Browser
+    browser = "unknown"
+    if "edg" in ua_lower:
+        browser = "edge"
+    elif "chrome" in ua_lower:
+        browser = "chrome"
+    elif "safari" in ua_lower and "chrome" not in ua_lower:
+        browser = "safari"
+    elif "firefox" in ua_lower:
+        browser = "firefox"
+    elif "opera" in ua_lower or "opr" in ua_lower:
+        browser = "opera"
+    
+    # OS
+    os_name = "unknown"
+    if "windows" in ua_lower:
+        os_name = "windows"
+    elif "mac os" in ua_lower or "macos" in ua_lower:
+        os_name = "macos"
+    elif "linux" in ua_lower:
+        os_name = "linux"
+    elif "android" in ua_lower:
+        os_name = "android"
+    elif "ios" in ua_lower or "iphone" in ua_lower or "ipad" in ua_lower:
+        os_name = "ios"
+    
+    return {
+        "device_type": device_type,
+        "browser": browser,
+        "os": os_name
+    }
+
+@api_router.post("/visitors/track")
+async def track_visitor(request: Request):
+    """Track a new visitor session"""
+    body = await request.json()
+    
+    # Get IP address
+    forwarded_for = request.headers.get("X-Forwarded-For")
+    ip_address = forwarded_for.split(",")[0] if forwarded_for else request.client.host
+    
+    # Get location from IP
+    location_data = await get_location_from_ip(ip_address)
+    
+    # Parse user agent
+    user_agent = request.headers.get("User-Agent", "")
+    device_info = parse_user_agent(user_agent)
+    
+    # Get current user if logged in
+    user = await get_current_user(request)
+    user_type = "guest"
+    user_id = None
+    user_email = None
+    
+    if user:
+        user_type = "admin" if is_admin_user(user['email']) else "registered"
+        user_id = user.get('user_id')
+        user_email = user.get('email')
+    
+    # Create visitor session
+    session = VisitorSession(
+        session_id=body.get('session_id', str(uuid.uuid4())),
+        user_id=user_id,
+        user_email=user_email,
+        user_type=user_type,
+        ip_address=ip_address,
+        **location_data,
+        user_agent=user_agent,
+        **device_info,
+        screen_resolution=body.get('screen_resolution'),
+        language=body.get('language'),
+        timezone=body.get('timezone'),
+        referrer=body.get('referrer', 'direct'),
+        utm_source=body.get('utm_source'),
+        utm_medium=body.get('utm_medium'),
+        utm_campaign=body.get('utm_campaign'),
+        landing_page=body.get('landing_page'),
+    )
+    
+    # Store in database
+    doc = session.model_dump()
+    doc['first_visit'] = doc['first_visit'].isoformat()
+    doc['last_activity'] = doc['last_activity'].isoformat()
+    
+    await db.visitor_sessions.insert_one(doc)
+    
+    return {
+        "success": True,
+        "session_id": session.session_id,
+        "location": {
+            "country": session.country,
+            "city": session.city
+        }
+    }
+
+@api_router.post("/visitors/heartbeat")
+async def visitor_heartbeat(heartbeat: VisitorHeartbeat, request: Request):
+    """Update visitor activity (called every 30 seconds from frontend)"""
+    # Update session last_activity
+    session = await db.visitor_sessions.find_one({"session_id": heartbeat.session_id})
+    
+    if session:
+        last_activity = datetime.fromisoformat(session['last_activity']) if isinstance(session['last_activity'], str) else session['last_activity']
+        first_visit = datetime.fromisoformat(session['first_visit']) if isinstance(session['first_visit'], str) else session['first_visit']
+        
+        now = datetime.now(timezone.utc)
+        duration = int((now - first_visit).total_seconds())
+        
+        await db.visitor_sessions.update_one(
+            {"session_id": heartbeat.session_id},
+            {
+                "$set": {
+                    "last_activity": now.isoformat(),
+                    "session_duration": duration,
+                    "is_active": True
+                },
+                "$addToSet": {
+                    "pages_viewed": heartbeat.current_page
+                }
+            }
+        )
+        
+        return {"success": True, "duration": duration}
+    
+    return {"success": False, "message": "Session not found"}
+
+@api_router.post("/analytics/pageview")
+async def track_pageview(request: Request):
+    """Track a page view"""
+    body = await request.json()
+    user = await get_current_user(request)
+    
+    pageview = PageView(
+        session_id=body.get('session_id'),
+        user_id=user.get('user_id') if user else None,
+        page_path=body.get('page_path'),
+        page_title=body.get('page_title'),
+        referrer=body.get('referrer'),
+        time_on_page=body.get('time_on_page', 0)
+    )
+    
+    doc = pageview.model_dump()
+    doc['timestamp'] = doc['timestamp'].isoformat()
+    
+    await db.page_views.insert_one(doc)
+    
+    return {"success": True}
+
+@api_router.post("/analytics/event")
+async def track_event(request: Request):
+    """Track a custom analytics event"""
+    body = await request.json()
+    user = await get_current_user(request)
+    
+    event = AnalyticsEvent(
+        session_id=body.get('session_id'),
+        user_id=user.get('user_id') if user else None,
+        event_type=body.get('event_type'),
+        event_category=body.get('event_category'),
+        event_label=body.get('event_label'),
+        event_value=body.get('event_value'),
+        event_data=body.get('event_data')
+    )
+    
+    doc = event.model_dump()
+    doc['timestamp'] = doc['timestamp'].isoformat()
+    
+    await db.analytics_events.insert_one(doc)
+    
+    # Also update the session events array
+    await db.visitor_sessions.update_one(
+        {"session_id": body.get('session_id')},
+        {
+            "$push": {
+                "events": {
+                    "type": event.event_type,
+                    "timestamp": doc['timestamp'],
+                    "data": event.event_data
+                }
+            }
+        }
+    )
+    
+    return {"success": True}
+
+@api_router.get("/analytics/overview")
+async def get_analytics_overview(request: Request, days: int = 7):
+    """Get comprehensive analytics overview for admin dashboard"""
+    user = await get_current_user(request)
+    
+    if not user or not is_admin_user(user['email']):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Calculate date range
+    start_date = datetime.now(timezone.utc) - timedelta(days=days)
+    start_date_iso = start_date.isoformat()
+    
+    # Get visitor counts
+    total_visitors = await db.visitor_sessions.count_documents({
+        "first_visit": {"$gte": start_date_iso}
+    })
+    
+    # Get unique visitors (by session_id)
+    unique_sessions = await db.visitor_sessions.distinct("session_id", {
+        "first_visit": {"$gte": start_date_iso}
+    })
+    unique_visitors = len(unique_sessions)
+    
+    # Get registered vs guest counts
+    registered_users = await db.visitor_sessions.count_documents({
+        "first_visit": {"$gte": start_date_iso},
+        "user_type": "registered"
+    })
+    
+    guest_visitors = await db.visitor_sessions.count_documents({
+        "first_visit": {"$gte": start_date_iso},
+        "user_type": "guest"
+    })
+    
+    # Get active sessions (last 5 minutes)
+    five_mins_ago = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
+    active_sessions = await db.visitor_sessions.count_documents({
+        "last_activity": {"$gte": five_mins_ago},
+        "is_active": True
+    })
+    
+    # Get total page views
+    total_page_views = await db.page_views.count_documents({
+        "timestamp": {"$gte": start_date_iso}
+    })
+    
+    # Calculate average session duration
+    sessions = await db.visitor_sessions.find({
+        "first_visit": {"$gte": start_date_iso}
+    }, {"session_duration": 1}).to_list(10000)
+    
+    avg_duration = sum(s.get('session_duration', 0) for s in sessions) / len(sessions) if sessions else 0
+    
+    # Get top pages
+    page_counts = await db.page_views.aggregate([
+        {"$match": {"timestamp": {"$gte": start_date_iso}}},
+        {"$group": {"_id": "$page_path", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 10}
+    ]).to_list(10)
+    
+    top_pages = [{"page": p["_id"], "views": p["count"]} for p in page_counts]
+    
+    # Get top countries
+    country_counts = await db.visitor_sessions.aggregate([
+        {"$match": {"first_visit": {"$gte": start_date_iso}, "country": {"$ne": None}}},
+        {"$group": {"_id": "$country", "count": {"$sum": 1}, "country_code": {"$first": "$country_code"}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 10}
+    ]).to_list(10)
+    
+    top_countries = [{"country": c["_id"], "country_code": c.get("country_code"), "visitors": c["count"]} for c in country_counts]
+    
+    # Get traffic sources
+    source_counts = await db.visitor_sessions.aggregate([
+        {"$match": {"first_visit": {"$gte": start_date_iso}}},
+        {"$group": {"_id": "$referrer", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 10}
+    ]).to_list(10)
+    
+    traffic_sources = [{"source": s["_id"] or "direct", "visitors": s["count"]} for s in source_counts]
+    
+    # Get conversion funnel
+    cart_events = await db.analytics_events.count_documents({
+        "timestamp": {"$gte": start_date_iso},
+        "event_type": "add_to_cart"
+    })
+    
+    checkout_events = await db.analytics_events.count_documents({
+        "timestamp": {"$gte": start_date_iso},
+        "event_type": "begin_checkout"
+    })
+    
+    purchase_events = await db.analytics_events.count_documents({
+        "timestamp": {"$gte": start_date_iso},
+        "event_type": "purchase"
+    })
+    
+    conversion_rate = (purchase_events / total_visitors * 100) if total_visitors > 0 else 0
+    
+    funnel = ConversionFunnel(
+        visitor_count=total_visitors,
+        cart_additions=cart_events,
+        checkout_started=checkout_events,
+        purchases=purchase_events,
+        conversion_rate=round(conversion_rate, 2)
+    )
+    
+    return AnalyticsOverview(
+        total_visitors=total_visitors,
+        unique_visitors=unique_visitors,
+        registered_users=registered_users,
+        guest_visitors=guest_visitors,
+        active_sessions=active_sessions,
+        total_page_views=total_page_views,
+        avg_session_duration=round(avg_duration, 2),
+        top_pages=top_pages,
+        top_countries=top_countries,
+        traffic_sources=traffic_sources,
+        conversion_funnel=funnel.model_dump()
+    )
+
+@api_router.get("/analytics/users-by-location")
+async def get_users_by_location(request: Request, user_type: str = "all"):
+    """Get user distribution by location with filtering"""
+    user = await get_current_user(request)
+    
+    if not user or not is_admin_user(user['email']):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    query = {"country": {"$ne": None}}
+    
+    # Filter by user type
+    if user_type == "registered":
+        query["user_type"] = "registered"
+    elif user_type == "guest":
+        query["user_type"] = "guest"
+    elif user_type == "signup":
+        # Only users who signed up (have user_id)
+        query["user_id"] = {"$ne": None}
+    
+    # Aggregate by country and city
+    country_data = await db.visitor_sessions.aggregate([
+        {"$match": query},
+        {"$group": {
+            "_id": {
+                "country": "$country",
+                "country_code": "$country_code",
+                "city": "$city"
+            },
+            "count": {"$sum": 1}
+        }},
+        {"$sort": {"count": -1}},
+        {"$limit": 100}
+    ]).to_list(100)
+    
+    # Format response
+    locations = []
+    for item in country_data:
+        locations.append({
+            "country": item["_id"]["country"],
+            "country_code": item["_id"]["country_code"],
+            "city": item["_id"]["city"],
+            "count": item["count"]
+        })
+    
+    return {
+        "locations": locations,
+        "total": len(locations),
+        "filter": user_type
+    }
+
+@api_router.get("/analytics/realtime")
+async def get_realtime_analytics(request: Request):
+    """Get real-time analytics (last 5 minutes)"""
+    user = await get_current_user(request)
+    
+    if not user or not is_admin_user(user['email']):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    five_mins_ago = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
+    
+    # Active visitors
+    active_visitors = await db.visitor_sessions.find({
+        "last_activity": {"$gte": five_mins_ago},
+        "is_active": True
+    }, {"_id": 0, "country": 1, "city": 1, "pages_viewed": 1, "user_type": 1}).to_list(100)
+    
+    # Recent events
+    recent_events = await db.analytics_events.find({
+        "timestamp": {"$gte": five_mins_ago}
+    }, {"_id": 0}).sort("timestamp", -1).to_list(50)
+    
+    for event in recent_events:
+        if isinstance(event.get('timestamp'), str):
+            event['timestamp'] = event['timestamp']
+    
+    return {
+        "active_count": len(active_visitors),
+        "active_visitors": active_visitors,
+        "recent_events": recent_events
+    }
+
+
 # ============================================
 # AUTHENTICATION ROUTES
 # ============================================
