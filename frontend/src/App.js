@@ -207,6 +207,7 @@ const AppRouter = () => {
   
   return (
     <>
+      <VisitorTracker />
       <ScrollToTop />
       <Suspense fallback={<PageLoader />}>
         <Routes>
