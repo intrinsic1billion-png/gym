@@ -47,6 +47,7 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const OrderTracking = lazy(() => import("./pages/OrderTracking"));
 const Wishlist = lazy(() => import("./pages/Wishlist"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
+const AnalyticsDashboard = lazy(() => import("./components/AnalyticsDashboard"));
 
 // Loading fallback
 const PageLoader = () => (
