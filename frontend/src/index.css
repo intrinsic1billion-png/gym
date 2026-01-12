@@ -16,7 +16,7 @@ html {
 /* RAZE Brand Theme Variables */
 :root {
     /* Dark theme colors for RAZE */
-    --bg-page: #1a1a1a;
+    --bg-page: #000000;
     --bg-card: #242424;
     --text-primary: #f5f5f5;
     --text-secondary: #a0a0a0;
