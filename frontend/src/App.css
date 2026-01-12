@@ -535,7 +535,7 @@ html, body {
    ======================================== */
 :root {
   --bg-page: #000000;
-  --bg-card: #0a0a0a;
+  --bg-card: #000000;
   --bg-card-elevated: #141414;
   --bg-card-image: #EFEFEF;
   --text-primary: #ffffff;
@@ -1372,7 +1372,7 @@ body {
 .product-image-wrapper {
   position: relative;
   height: 480px;
-  background: linear-gradient(180deg, #0a0a0a 0%, #141414 100%);
+  background: linear-gradient(180deg, #000000 0%, #141414 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5560,7 +5560,7 @@ body {
   width: 60px;
   height: 60px;
   object-fit: contain;
-  background: #0a0a0a;
+  background: #000000;
   border-radius: 6px;
 }
 
@@ -7475,7 +7475,7 @@ body {
   position: relative;
   width: 100%;
   aspect-ratio: 1;
-  background: radial-gradient(ellipse at center, rgba(0, 217, 255, 0.25) 0%, rgba(0, 217, 255, 0.12) 30%, rgba(10, 10, 10, 0.9) 60%, #0a0a0a 100%);
+  background: radial-gradient(ellipse at center, rgba(0, 217, 255, 0.25) 0%, rgba(0, 217, 255, 0.12) 30%, rgba(10, 10, 10, 0.9) 60%, #000000 100%);
   border-radius: 20px;
   display: flex;
   align-items: center;
@@ -12985,7 +12985,7 @@ body {
 .product-image-wrapper-shop {
   position: relative;
   height: 300px;
-  background: linear-gradient(180deg, #0a0a0a 0%, #141414 100%);
+  background: linear-gradient(180deg, #000000 0%, #141414 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -13197,7 +13197,7 @@ body {
 }
 
 .main-image-wrapper {
-  background: linear-gradient(180deg, #0a0a0a 0%, #141414 100%);
+  background: linear-gradient(180deg, #000000 0%, #141414 100%);
   border-radius: 20px;
   padding: 32px;
   display: flex;
