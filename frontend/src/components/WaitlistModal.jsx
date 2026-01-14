@@ -18,6 +18,7 @@ const WaitlistModal = ({ isOpen, onClose, product, initialSize, initialGender })
   const [spotsRemaining, setSpotsRemaining] = useState(null);
   const [showDuplicateConfirm, setShowDuplicateConfirm] = useState(false);
   const [pendingSubmission, setPendingSubmission] = useState(null);
+  const [savedScrollPosition, setSavedScrollPosition] = useState(0);
 
   // Check if this is a shorts product
   const isShorts = product?.category === 'Shorts';
