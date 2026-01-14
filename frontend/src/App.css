@@ -7313,6 +7313,7 @@ body {
   inset: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile browsers */
   background: rgba(0, 0, 0, 0.92);
   backdrop-filter: blur(12px);
   z-index: 10000;
@@ -7320,6 +7321,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* iOS Safari specific fixes */
+  -webkit-overflow-scrolling: touch;
 }
 
 .product-modal {
@@ -7332,6 +7335,7 @@ body {
   max-width: 1100px;
   width: 90%;
   max-height: 90vh;
+  max-height: 90dvh; /* Dynamic viewport height */
   overflow-y: auto;
   animation: modalSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7), 0 0 60px rgba(0, 217, 255, 0.1);
