@@ -56,23 +56,12 @@ const WaitlistModal = ({ isOpen, onClose, product, initialSize, initialGender })
       setError('');
       setEmail('');
       
-      // Prevent body scroll and hide Safari UI
+      // Prevent body scroll
       const scrollY = window.scrollY;
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = '100%';
-      
-      document.documentElement.classList.add('modal-open');
-      document.body.classList.add('modal-open');
-      
-      // Update viewport for iOS Safari
-      const viewport = document.querySelector('meta[name=viewport]');
-      if (viewport) {
-        viewport.setAttribute('content', 
-          'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, minimal-ui, shrink-to-fit=no'
-        );
-      }
     }
     return () => {
       const scrollY = document.body.style.top;
@@ -81,16 +70,6 @@ const WaitlistModal = ({ isOpen, onClose, product, initialSize, initialGender })
       document.body.style.top = '';
       document.body.style.width = '';
       window.scrollTo(0, parseInt(scrollY || '0') * -1);
-      
-      document.documentElement.classList.remove('modal-open');
-      document.body.classList.remove('modal-open');
-      
-      const viewport = document.querySelector('meta[name=viewport]');
-      if (viewport) {
-        viewport.setAttribute('content', 
-          'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover'
-        );
-      }
     };
   }, [isOpen, isShorts, initialSize, initialGender]);
 
