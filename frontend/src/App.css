@@ -16373,6 +16373,8 @@ tr.selected {
 
 .modal-actions {
   margin-top: 20px;
+  margin-bottom: 20px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   display: flex;
   gap: 12px;
 }
