@@ -68,12 +68,6 @@ const ProductModal = ({ isOpen, onClose, product, initialSize, initialGender }) 
         );
       }
       
-      // Try to scroll to hide Safari UI on iOS
-      setTimeout(() => {
-        window.scrollTo(0, 1);
-        window.scrollTo(0, 0);
-      }, 100);
-      
       // Prevent touch scrolling on document
       const preventScroll = (e) => {
         if (e.target.closest('.product-modal')) {
