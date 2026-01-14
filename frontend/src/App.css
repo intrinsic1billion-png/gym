@@ -8076,11 +8076,9 @@ body {
     overflow-y: auto !important;
     gap: 0;
     padding: 8px;
-    /* Reserve space for header buttons so content doesn't overlap */
     padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
-    /* Reserve space for Safari bottom bar - critical fix - INCREASED */
-    padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 150px);
-    max-height: calc(95vh - 50px);
+    padding-bottom: 20px;
+    max-height: none;
   }
 
   /* Image section - moves UP, no extra top margin */
