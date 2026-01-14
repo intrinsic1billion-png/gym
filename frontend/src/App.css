@@ -14386,8 +14386,11 @@ body {
   }
   
   .qty-btn {
-    min-width: 42px;
-    min-height: 42px;
+    min-width: 48px;
+    min-height: 48px;
+    font-size: 20px;
+    font-weight: 700;
+    border-width: 2px;
   }
   
   .waitlist-note {
