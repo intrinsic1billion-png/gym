@@ -73,12 +73,6 @@ const WaitlistModal = ({ isOpen, onClose, product, initialSize, initialGender })
           'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, minimal-ui, shrink-to-fit=no'
         );
       }
-      
-      // Try to hide Safari UI
-      setTimeout(() => {
-        window.scrollTo(0, 1);
-        window.scrollTo(0, 0);
-      }, 100);
     }
     return () => {
       const scrollY = document.body.style.top;
