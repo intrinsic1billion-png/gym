@@ -7654,7 +7654,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 32px;
+  margin-bottom: 16px;
 }
 
 .modal-original-price {
