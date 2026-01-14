@@ -7840,6 +7840,9 @@ body {
   color: white;
   box-shadow: 0 6px 20px rgba(0, 217, 255, 0.4);
   transform: scale(1.05);
+  background-clip: padding-box;
+  overflow: hidden;
+  isolation: isolate;
 }
 
 /* Add to cart */
