@@ -44,44 +44,15 @@ const ProductModal = ({ isOpen, onClose, product, initialSize, initialGender }) 
     setSelectedSize(newGender === 'mens' ? 'M' : 'S');
   };
 
-  // Prevent body scroll when modal is open AND hide Safari UI
+  // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
-      // Lock body scroll and position
+      // Lock body scroll
       const scrollY = window.scrollY;
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = '100%';
-      document.body.style.height = '100%';
-      
-      // Add classes to html and body for full-screen
-      document.documentElement.classList.add('modal-open');
-      document.body.classList.add('modal-open');
-      
-      // Prevent Safari bottom bar from appearing on iOS
-      const viewport = document.querySelector('meta[name=viewport]');
-      const originalViewport = viewport?.getAttribute('content');
-      if (viewport) {
-        viewport.setAttribute('content', 
-          'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, minimal-ui, shrink-to-fit=no'
-        );
-      }
-      
-      // Prevent touch scrolling on document
-      const preventScroll = (e) => {
-        if (e.target.closest('.product-modal')) {
-          return;
-        }
-        e.preventDefault();
-      };
-      document.addEventListener('touchmove', preventScroll, { passive: false });
-      
-      return () => {
-        document.removeEventListener('touchmove', preventScroll);
-        document.documentElement.classList.remove('modal-open');
-        document.body.classList.remove('modal-open');
-      };
     } else {
       // Restore body scroll
       const scrollY = document.body.style.top;
@@ -89,16 +60,7 @@ const ProductModal = ({ isOpen, onClose, product, initialSize, initialGender }) 
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.width = '';
-      document.body.style.height = '';
       window.scrollTo(0, parseInt(scrollY || '0') * -1);
-      
-      // Restore original viewport settings
-      const viewport = document.querySelector('meta[name=viewport]');
-      if (viewport) {
-        viewport.setAttribute('content', 
-          'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover'
-        );
-      }
     }
     
     return () => {
@@ -106,7 +68,6 @@ const ProductModal = ({ isOpen, onClose, product, initialSize, initialGender }) 
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.width = '';
-      document.body.style.height = '';
     };
   }, [isOpen]);
 
