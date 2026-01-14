@@ -7323,6 +7323,8 @@ body {
   justify-content: center;
   /* iOS Safari specific fixes */
   -webkit-overflow-scrolling: touch;
+  /* Prevent Safari UI from showing */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .product-modal {
@@ -7340,6 +7342,8 @@ body {
   animation: modalSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7), 0 0 60px rgba(0, 217, 255, 0.1);
   backdrop-filter: blur(20px);
+  /* Account for safe areas on iOS */
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
 }
 
 /* Custom scrollbar for modal */
