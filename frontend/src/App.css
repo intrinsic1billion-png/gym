@@ -8194,10 +8194,34 @@ body {
   opacity: 0;
   transition: opacity 0.2s ease;
   pointer-events: none;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
-.product-image-wrapper.clickable:hover .view-details-hint {
-  opacity: 1;
+/* Desktop: show on hover */
+@media (hover: hover) and (pointer: fine) {
+  .product-image-wrapper.clickable:hover .view-details-hint {
+    opacity: 1;
+  }
+}
+
+/* Mobile/Touch: always visible with subtle animation */
+@media (hover: none) and (pointer: coarse) {
+  .view-details-hint {
+    opacity: 0.85;
+    animation: gentle-pulse 3s ease-in-out infinite;
+  }
+  
+  /* Show fully when tapping/active */
+  .product-image-wrapper.clickable:active .view-details-hint {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.05);
+  }
+}
+
+@keyframes gentle-pulse {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
 }
 
 /* View details hint with inline gender toggle for shorts */
