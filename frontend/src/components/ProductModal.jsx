@@ -47,8 +47,11 @@ const ProductModal = ({ isOpen, onClose, product, initialSize, initialGender }) 
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
+      // Lock body scroll
+      const scrollY = window.scrollY;
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
       document.body.style.width = '100%';
       document.body.style.height = '100%';
       
@@ -56,14 +59,23 @@ const ProductModal = ({ isOpen, onClose, product, initialSize, initialGender }) 
       const viewport = document.querySelector('meta[name=viewport]');
       if (viewport) {
         viewport.setAttribute('content', 
-          'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover'
+          'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, minimal-ui'
         );
       }
+      
+      // Force minimal UI on iOS Safari
+      if (window.innerHeight < window.screen.height) {
+        document.documentElement.requestFullscreen?.();
+      }
     } else {
-      document.body.style.overflow = 'unset';
+      // Restore body scroll
+      const scrollY = document.body.style.top;
+      document.body.style.overflow = '';
       document.body.style.position = '';
+      document.body.style.top = '';
       document.body.style.width = '';
       document.body.style.height = '';
+      window.scrollTo(0, parseInt(scrollY || '0') * -1);
       
       // Restore original viewport settings
       const viewport = document.querySelector('meta[name=viewport]');
@@ -75,8 +87,9 @@ const ProductModal = ({ isOpen, onClose, product, initialSize, initialGender }) 
     }
     
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
       document.body.style.position = '';
+      document.body.style.top = '';
       document.body.style.width = '';
       document.body.style.height = '';
     };
