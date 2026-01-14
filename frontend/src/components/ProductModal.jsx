@@ -13,6 +13,7 @@ const ProductModal = ({ isOpen, onClose, product, initialSize, initialGender }) 
   const [selectedSize, setSelectedSize] = useState(initialSize || 'M');
   const [selectedGender, setSelectedGender] = useState(initialGender || 'mens');
   const [waitlistOpen, setWaitlistOpen] = useState(false);
+  const [savedScrollPosition, setSavedScrollPosition] = useState(0);
   const navigate = useNavigate();
 
   // Determine if this is a shorts product
