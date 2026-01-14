@@ -44,10 +44,10 @@ const ProductModal = ({ isOpen, onClose, product, initialSize, initialGender }) 
     setSelectedSize(newGender === 'mens' ? 'M' : 'S');
   };
 
-  // Prevent body scroll when modal is open
+  // Prevent body scroll when modal is open AND hide Safari UI
   useEffect(() => {
     if (isOpen) {
-      // Lock body scroll
+      // Lock body scroll and position
       const scrollY = window.scrollY;
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
@@ -55,18 +55,39 @@ const ProductModal = ({ isOpen, onClose, product, initialSize, initialGender }) 
       document.body.style.width = '100%';
       document.body.style.height = '100%';
       
+      // Add classes to html and body for full-screen
+      document.documentElement.classList.add('modal-open');
+      document.body.classList.add('modal-open');
+      
       // Prevent Safari bottom bar from appearing on iOS
       const viewport = document.querySelector('meta[name=viewport]');
+      const originalViewport = viewport?.getAttribute('content');
       if (viewport) {
         viewport.setAttribute('content', 
-          'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, minimal-ui'
+          'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, minimal-ui, shrink-to-fit=no'
         );
       }
       
-      // Force minimal UI on iOS Safari
-      if (window.innerHeight < window.screen.height) {
-        document.documentElement.requestFullscreen?.();
-      }
+      // Try to scroll to hide Safari UI on iOS
+      setTimeout(() => {
+        window.scrollTo(0, 1);
+        window.scrollTo(0, 0);
+      }, 100);
+      
+      // Prevent touch scrolling on document
+      const preventScroll = (e) => {
+        if (e.target.closest('.product-modal')) {
+          return;
+        }
+        e.preventDefault();
+      };
+      document.addEventListener('touchmove', preventScroll, { passive: false });
+      
+      return () => {
+        document.removeEventListener('touchmove', preventScroll);
+        document.documentElement.classList.remove('modal-open');
+        document.body.classList.remove('modal-open');
+      };
     } else {
       // Restore body scroll
       const scrollY = document.body.style.top;
@@ -81,7 +102,7 @@ const ProductModal = ({ isOpen, onClose, product, initialSize, initialGender }) 
       const viewport = document.querySelector('meta[name=viewport]');
       if (viewport) {
         viewport.setAttribute('content', 
-          'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
+          'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover'
         );
       }
     }
