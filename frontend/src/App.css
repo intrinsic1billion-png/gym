@@ -10611,7 +10611,7 @@ body {
   right: 0;
   bottom: 0;
   height: 100vh;
-  height: 100dvh; /* Dynamic viewport height for iOS Safari */
+  height: 100svh; /* Small viewport height for iOS Safari */
   background: rgba(0,0,0,0.85);
   backdrop-filter: blur(8px);
   display: flex;
@@ -10620,6 +10620,7 @@ body {
   z-index: 10000;
   padding: 20px;
   -webkit-overflow-scrolling: touch;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .waitlist-modal {
