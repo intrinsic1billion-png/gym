@@ -48,20 +48,24 @@ const ProductModal = ({ isOpen, onClose, product, initialSize, initialGender }) 
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
-      // Lock body scroll
+      // Save current scroll position
       const scrollY = window.scrollY;
+      setSavedScrollPosition(scrollY);
+      
+      // Lock body scroll
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = '100%';
     } else {
-      // Restore body scroll
-      const scrollY = document.body.style.top;
+      // Restore body scroll and position
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.width = '';
-      window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      
+      // Restore scroll position
+      window.scrollTo(0, savedScrollPosition);
     }
     
     return () => {
@@ -70,7 +74,7 @@ const ProductModal = ({ isOpen, onClose, product, initialSize, initialGender }) 
       document.body.style.top = '';
       document.body.style.width = '';
     };
-  }, [isOpen]);
+  }, [isOpen, savedScrollPosition]);
 
   if (!isOpen || !product) return null;
 
