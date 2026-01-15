@@ -14280,8 +14280,7 @@ body {
   }
   
   .giveaway-close,
-  .popup-close,
-  .modal-close {
+  .popup-close {
     width: 44px !important;
     height: 44px !important;
     min-width: 44px;
@@ -14294,6 +14293,14 @@ body {
     justify-content: center;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 50%;
+  }
+  
+  /* Product modal close button - smaller on mobile */
+  .modal-header-actions .modal-close {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
   }
   
   .giveaway-popup h2,
