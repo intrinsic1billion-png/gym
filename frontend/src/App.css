@@ -17149,3 +17149,229 @@ tr.low-stock {
   }
 }
 
+
+
+/* ============================================
+   NAVIGATION DROPDOWN STYLES
+   ============================================ */
+
+.nav-dropdown-container {
+  position: relative;
+}
+
+.nav-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dropdown-chevron {
+  transition: transform 0.2s ease;
+}
+
+.dropdown-chevron.rotate {
+  transform: rotate(180deg);
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 0;
+  min-width: 180px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  margin-top: 8px;
+}
+
+.nav-dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
+}
+
+.nav-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.nav-dropdown-item:hover {
+  background: rgba(0, 217, 255, 0.1);
+  color: var(--brand-primary);
+}
+
+/* Mobile Nav Group */
+.mobile-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mobile-nav-group-title {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 8px 0 4px 0;
+  opacity: 0.6;
+}
+
+.mobile-nav-subitem {
+  padding-left: 12px !important;
+  font-size: 0.95rem;
+}
+
+/* ============================================
+   FROM OUR CUSTOMERS PAGE STYLES
+   ============================================ */
+
+.customers-page {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  padding-top: 100px;
+  padding-bottom: 80px;
+}
+
+.customers-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.customers-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.customers-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: 0.1em;
+  margin: 0 0 20px 0;
+}
+
+.customers-rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.customers-rating .stars-row {
+  display: flex;
+  gap: 4px;
+}
+
+.customers-rating-text {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.customers-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+  margin: 0;
+}
+
+/* Reviews Grid */
+.customers-reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.customers-review-card {
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.customers-review-card:hover {
+  border-color: rgba(0, 217, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.customers-review-stars {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.customers-review-text {
+  color: var(--text-primary);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 16px 0;
+  font-style: italic;
+}
+
+.customers-review-author {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.customers-author-name {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.customers-author-product {
+  color: var(--brand-primary);
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* Mobile Responsive */
+@media (max-width: 900px) {
+  .customers-reviews-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .customers-page {
+    padding-top: 80px;
+    padding-bottom: 60px;
+  }
+
+  .customers-container {
+    padding: 0 16px;
+  }
+
+  .customers-title {
+    font-size: 1.75rem;
+  }
+
+  .customers-reviews-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .customers-review-card {
+    padding: 20px;
+  }
+}
+
