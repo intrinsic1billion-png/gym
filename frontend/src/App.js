@@ -227,6 +227,7 @@ const AppRouter = () => {
         <Route path="/size-guide" element={<><Header /><SizeGuide /><Footer /></>} />
         <Route path="/faq" element={<><Header /><FAQ /><Footer /></>} />
         <Route path="/about" element={<><Header /><About /><Footer /></>} />
+        <Route path="/from-our-customers" element={<><Header /><FromOurCustomers /><Footer /></>} />
         <Route path="/returns" element={<><Header /><Returns /><Footer /></>} />
         <Route path="/dashboard" element={<><Header /><Dashboard /><Footer /></>} />
         <Route path="/account" element={<><Header /><Dashboard /><Footer /></>} />
