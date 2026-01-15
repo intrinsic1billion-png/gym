@@ -7436,14 +7436,19 @@ body {
   padding: 0;
   border-radius: 50%;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  min-height: 44px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.modal-header-actions .modal-close svg {
+  width: 18px;
+  height: 18px;
 }
 
 .modal-header-actions .modal-close:hover {
