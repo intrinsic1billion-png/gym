@@ -60,6 +60,9 @@ const ProductModal = ({ isOpen, onClose, product, initialSize, initialGender }) 
       document.body.style.right = '0';
       document.body.style.width = '100%';
     } else {
+      // Get the saved position from the body's top style before clearing
+      const scrollY = savedScrollPosition;
+      
       // Restore body scroll and position
       document.body.style.overflow = '';
       document.body.style.position = '';
@@ -68,8 +71,10 @@ const ProductModal = ({ isOpen, onClose, product, initialSize, initialGender }) 
       document.body.style.right = '';
       document.body.style.width = '';
       
-      // Restore scroll position
-      window.scrollTo(0, savedScrollPosition);
+      // Restore scroll position instantly without animation
+      if (scrollY > 0) {
+        window.scrollTo({ top: scrollY, left: 0, behavior: 'instant' });
+      }
     }
     
     return () => {
