@@ -8086,10 +8086,10 @@ body {
      ======================================== */
   .modal-header-actions .modal-share-header .share-trigger {
     /* Match X button exactly */
-    width: 48px;
-    height: 48px;
-    min-width: 48px;
-    min-height: 48px;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
     background: rgba(0, 0, 0, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 50%;
@@ -8106,8 +8106,8 @@ body {
   
   /* Share icon - MATCH X icon size exactly */
   .modal-header-actions .modal-share-header .share-trigger svg {
-    width: 20px;
-    height: 20px;
+    width: 14px;
+    height: 14px;
     color: #fff;
     stroke-width: 2.25;
   }
