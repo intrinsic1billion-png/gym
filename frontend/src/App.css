@@ -7464,10 +7464,10 @@ body {
 }
 
 .modal-header-actions .modal-share-header .share-trigger {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  min-height: 44px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
   background: rgba(0, 217, 255, 0.08);
   border: 1px solid rgba(0, 217, 255, 0.2);
   border-radius: 50%;
@@ -7479,6 +7479,11 @@ body {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0;
   flex-shrink: 0;
+}
+
+.modal-header-actions .modal-share-header .share-trigger svg {
+  width: 16px;
+  height: 16px;
 }
 
 .modal-header-actions .modal-share-header .share-trigger:hover {
