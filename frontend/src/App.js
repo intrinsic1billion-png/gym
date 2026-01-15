@@ -49,6 +49,7 @@ const OrderTracking = lazy(() => import("./pages/OrderTracking"));
 const Wishlist = lazy(() => import("./pages/Wishlist"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const AnalyticsDashboard = lazy(() => import("./components/AnalyticsDashboard"));
+const FromOurCustomers = lazy(() => import("./pages/FromOurCustomers"));
 
 // Loading fallback
 const PageLoader = () => (
