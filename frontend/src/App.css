@@ -7433,14 +7433,17 @@ body {
   border: 1px solid rgba(0, 217, 255, 0.2);
   color: var(--text-secondary);
   cursor: pointer;
-  padding: 10px;
+  padding: 0;
   border-radius: 50%;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .modal-header-actions .modal-close:hover {
