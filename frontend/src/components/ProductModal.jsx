@@ -145,7 +145,6 @@ const ProductModal = ({ isOpen, onClose, product, initialSize, initialGender }) 
             {/* Right side - Product details */}
             <div className="modal-details-section">
               <div className="modal-product-info">
-                <span className="modal-category">{product.category}</span>
                 <h2 className="modal-product-name">{product.name}</h2>
                 <span className="modal-variant">{product.variant}</span>
               </div>
