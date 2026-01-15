@@ -46,38 +46,27 @@ const About = () => {
           {/* RAZE IN MOTION - Image Gallery Section */}
           <section className="about-gallery-section">
             <h2 className="about-gallery-title">RAZE IN MOTION</h2>
-            <div className="about-gallery-grid">
-              {/* Image 1 - Main Hero Image with Animation */}
+            <div className="about-gallery-grid about-gallery-two">
+              {/* Image 1 - MAG Athlete with Animation */}
               <div className={`about-gallery-item about-gallery-main ${isVisible ? 'animate-fade-in-up' : ''}`}>
                 <img 
-                  src="https://images.unsplash.com/photo-1505619730259-b1288d154955?w=800&q=80" 
-                  alt="Gymnast in action - athletic training"
+                  src="/images/athletes/mag_athlete.jpg" 
+                  alt="Male gymnast training - athletic performance"
                   className="about-gallery-image"
                   data-testid="about-image-main"
                 />
-                <span className="about-image-label">Athletic Performance</span>
+                <span className="about-image-label">Men's Athletic Gymnastics</span>
               </div>
               
-              {/* Image 2 - Product/Lifestyle */}
+              {/* Image 2 - WAG Athlete */}
               <div className="about-gallery-item">
                 <img 
-                  src="https://images.unsplash.com/photo-1597296591262-3a1229aaecec?w=800&q=80" 
-                  alt="Athletic lifestyle - training apparel"
+                  src="/images/athletes/wag_athlete.jpg" 
+                  alt="Female gymnast training - athletic performance"
                   className="about-gallery-image"
                   data-testid="about-image-lifestyle"
                 />
-                <span className="about-image-label">Training Ready</span>
-              </div>
-              
-              {/* Image 3 - Fabric Detail */}
-              <div className="about-gallery-item">
-                <img 
-                  src="https://images.unsplash.com/photo-1675784332655-675d1a1ddcf6?w=800&q=80" 
-                  alt="Premium fabric texture detail"
-                  className="about-gallery-image"
-                  data-testid="about-image-detail"
-                />
-                <span className="about-image-label">Premium Materials</span>
+                <span className="about-image-label">Women's Athletic Gymnastics</span>
               </div>
             </div>
           </section>
