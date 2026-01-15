@@ -17054,3 +17054,98 @@ tr.low-stock {
   }
 }
 
+
+
+/* About Section - Updated Text Styles */
+.home-about-text p {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin: 0 0 16px 0;
+}
+
+.home-about-text p:last-child {
+  margin-bottom: 0;
+}
+
+.home-about-content .home-about-text {
+  margin-bottom: 32px;
+}
+
+/* What We Stand For - Mini Feature Row */
+.home-about-features {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.home-about-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.home-about-feature-icon {
+  color: var(--brand-primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.home-about-feature-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.home-about-feature-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.home-about-feature-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+/* Subtle Image Labels */
+.home-about-image-label-subtle {
+  font-size: 0.65rem;
+  padding: 4px 10px;
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
+
+.home-about-image-wrapper:hover .home-about-image-label-subtle {
+  opacity: 1;
+  color: var(--brand-primary);
+}
+
+/* Mobile Responsive for Features */
+@media (max-width: 900px) {
+  .home-about-features {
+    align-items: center;
+  }
+  
+  .home-about-feature {
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-about-feature-title {
+    font-size: 0.9rem;
+  }
+  
+  .home-about-feature-desc {
+    font-size: 0.8rem;
+  }
+}
+
