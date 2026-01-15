@@ -7416,12 +7416,13 @@ body {
 /* Desktop: Header actions container */
 .modal-header-actions {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 24px;
+  right: 24px;
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
+  justify-content: flex-end;
+  gap: 10px;
   z-index: 10;
 }
 
