@@ -50,9 +50,9 @@ const Header = () => {
             <Link to="/products" className="nav-link">
               {t('nav.products')}
             </Link>
-            <button onClick={() => scrollToSection('features')} className="nav-link">
-              {t('nav.whyRaze')}
-            </button>
+            <Link to="/about" className="nav-link">
+              About Us
+            </Link>
             <button onClick={() => scrollToSection('newsletter')} className="nav-link">
               {t('nav.earlyAccess')}
             </button>
