@@ -36,7 +36,7 @@ const AboutSection = () => {
               Most sportswear isn't built for gymnastics — where every routine demands control, grip, and full extension.
             </p>
             <p>
-              In gymnastics, every routine demands full range movement, control, and comfort. As gymnasts ourselves, we know how frustrating it is when clothing shifts mid-routine.
+              In gymnastics, every routine demands full range of motion, control, and comfort. As gymnasts ourselves, we know how frustrating it is when clothing shifts mid-routine.
             </p>
             <p>
               RAZE was created by gymnasts who got tired of clothing that rides up, restricts motion, or feels wrong at the worst moment. We build minimalist performance wear that moves with you — not against you.
