@@ -48,44 +48,16 @@ const ProductModal = ({ isOpen, onClose, product, initialSize, initialGender }) 
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
-      // Save current scroll position
-      const scrollY = window.scrollY;
-      setSavedScrollPosition(scrollY);
-      
-      // Lock body scroll
+      // Simply hide overflow - no position manipulation needed
       document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.body.style.width = '100%';
     } else {
-      // Get the saved position from the body's top style before clearing
-      const scrollY = savedScrollPosition;
-      
-      // Restore body scroll and position
       document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.width = '';
-      
-      // Restore scroll position instantly without animation
-      if (scrollY > 0) {
-        window.scrollTo({ top: scrollY, left: 0, behavior: 'instant' });
-      }
     }
     
     return () => {
       document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.width = '';
     };
-  }, [isOpen, savedScrollPosition]);
+  }, [isOpen]);
 
   if (!isOpen || !product) return null;
 
