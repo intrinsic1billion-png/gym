@@ -1,85 +1,94 @@
-import React, { useEffect } from 'react';
-import { Target, Users, Award } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 
 const About = () => {
-  // Scroll to top when component mounts
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Scroll to top and trigger animation when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
+    // Trigger fade-in animation after a short delay
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
-    <div className="info-page">
-      <div className="info-container">
-        <div className="info-header">
-          <h1 className="info-title">About RAZE</h1>
-          <p className="info-subtitle">Built by Discipline</p>
+    <div className="about-page">
+      <div className="about-container">
+        {/* Hero Section */}
+        <div className="about-hero-section">
+          <h1 className="about-main-title">ABOUT RAZE</h1>
+          <p className="about-subtitle">Built by Discipline. Made to Move.</p>
         </div>
 
-        <div className="info-content">
-          <section className="info-section about-hero">
-            <div className="about-statement">
-              <p className="lead-text">
-                RAZE was born from a simple observation: the best athletes don't need loud gear to perform. They need gear that works as hard as they do—quietly, consistently, without distraction.
-              </p>
+        {/* Main Content */}
+        <div className="about-content">
+          <section className="about-story-section">
+            <p className="about-lead-text">
+              Most sportswear is designed to look good — not to move properly.
+            </p>
+            <p className="about-paragraph">
+              As gymnasts, we understand how frustrating it feels when clothing holds you back during real training:
+            </p>
+            <ul className="about-pain-points">
+              <li>too tight in the shoulders and hips</li>
+              <li>too loose during swings and landings</li>
+              <li>uncomfortable when stretching, sprinting, or fully extending</li>
+            </ul>
+            <p className="about-paragraph about-mission">
+              That's why RAZE was created — performance clothing designed for full range of movement, so athletes can train comfortably and focus on execution, not adjusting their outfit.
+            </p>
+          </section>
+
+          {/* RAZE IN MOTION - Image Gallery Section */}
+          <section className="about-gallery-section">
+            <h2 className="about-gallery-title">RAZE IN MOTION</h2>
+            <div className="about-gallery-grid">
+              {/* Image 1 - Main Hero Image with Animation */}
+              <div className={`about-gallery-item about-gallery-main ${isVisible ? 'animate-fade-in-up' : ''}`}>
+                <img 
+                  src="https://images.unsplash.com/photo-1505619730259-b1288d154955?w=800&q=80" 
+                  alt="Gymnast in action - athletic training"
+                  className="about-gallery-image"
+                  data-testid="about-image-main"
+                />
+                <span className="about-image-label">Athletic Performance</span>
+              </div>
+              
+              {/* Image 2 - Product/Lifestyle */}
+              <div className="about-gallery-item">
+                <img 
+                  src="https://images.unsplash.com/photo-1597296591262-3a1229aaecec?w=800&q=80" 
+                  alt="Athletic lifestyle - training apparel"
+                  className="about-gallery-image"
+                  data-testid="about-image-lifestyle"
+                />
+                <span className="about-image-label">Training Ready</span>
+              </div>
+              
+              {/* Image 3 - Fabric Detail */}
+              <div className="about-gallery-item">
+                <img 
+                  src="https://images.unsplash.com/photo-1675784332655-675d1a1ddcf6?w=800&q=80" 
+                  alt="Premium fabric texture detail"
+                  className="about-gallery-image"
+                  data-testid="about-image-detail"
+                />
+                <span className="about-image-label">Premium Materials</span>
+              </div>
             </div>
           </section>
 
-          <section className="info-section">
-            <h2>The Origin</h2>
-            <p>
-              Founded by former gymnasts, RAZE draws from a discipline that demands precision, control, and relentless repetition. In gymnastics, there's no room for excess—every movement is intentional, every detail matters.
-            </p>
-            <p>
-              We brought that same philosophy to training wear. No unnecessary graphics. No hype. Just clean, technical gear designed to perform in the gym and look good outside of it.
-            </p>
-          </section>
-
-          <section className="info-section">
-            <h2>Our Philosophy</h2>
-            <div className="values-grid">
-              <div className="value-card">
-                <Target className="value-icon" size={28} />
-                <h3>Performance First</h3>
-                <p>Every design decision starts with function. We use technical fabrics that move, breathe, and perform under pressure.</p>
-              </div>
-              <div className="value-card">
-                <Award className="value-icon" size={28} />
-                <h3>Minimal by Design</h3>
-                <p>We strip away the unnecessary. What remains is essential—clean lines, subtle branding, timeless silhouettes.</p>
-              </div>
-              <div className="value-card">
-                <Users className="value-icon" size={28} />
-                <h3>Built for Athletes</h3>
-                <p>Our gear is tested by athletes who train daily. We listen, iterate, and improve with every drop.</p>
-              </div>
-            </div>
-          </section>
-
-          <section className="info-section">
-            <h2>The Drop Model</h2>
-            <p>
-              We don't mass-produce. Instead, we release products in limited quantities called "drops." This lets us maintain quality, reduce waste, and create gear that feels exclusive without artificial scarcity.
-            </p>
-            <p>
-              When a drop sells out, it may not return in the same colorway. This isn't manufactured hype—it's intentional design. We'd rather make less and make it right.
-            </p>
-          </section>
-
-          <section className="info-section">
-            <h2>Looking Forward</h2>
-            <p>
-              RAZE is just getting started. We're building a brand for athletes who value discipline over distraction, performance over posturing. 
-            </p>
-            <p>
-              Join us. Train hard. Stay focused.
-            </p>
-          </section>
-
-          <section className="info-section about-cta">
-            <div className="cta-box">
-              <h3>Join the Movement</h3>
-              <p>Sign up for early access to drops and exclusive content.</p>
-              <a href="/#newsletter" className="btn-primary">Get Early Access</a>
+          {/* CTA Section */}
+          <section className="about-cta-section">
+            <div className="about-cta-content">
+              <p className="about-cta-text">Train with purpose. Move with confidence.</p>
+              <Link to="/products" className="about-cta-button">
+                Shop Collection <ArrowRight size={20} />
+              </Link>
             </div>
           </section>
         </div>
