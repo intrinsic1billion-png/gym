@@ -51,9 +51,32 @@ const Header = () => {
             <Link to="/products" className="nav-link">
               {t('nav.products')}
             </Link>
-            <button onClick={() => scrollToSection('about')} className="nav-link">
-              About Us
-            </button>
+            <div 
+              className="nav-dropdown-container"
+              onMouseEnter={() => setIsAboutDropdownOpen(true)}
+              onMouseLeave={() => setIsAboutDropdownOpen(false)}
+            >
+              <button className="nav-link nav-dropdown-trigger">
+                About Us <ChevronDown size={16} className={`dropdown-chevron ${isAboutDropdownOpen ? 'rotate' : ''}`} />
+              </button>
+              {isAboutDropdownOpen && (
+                <div className="nav-dropdown-menu">
+                  <button 
+                    onClick={() => { scrollToSection('about'); setIsAboutDropdownOpen(false); }} 
+                    className="nav-dropdown-item"
+                  >
+                    About RAZE
+                  </button>
+                  <Link 
+                    to="/from-our-customers" 
+                    className="nav-dropdown-item"
+                    onClick={() => setIsAboutDropdownOpen(false)}
+                  >
+                    From our customers
+                  </Link>
+                </div>
+              )}
+            </div>
             <button onClick={() => scrollToSection('newsletter')} className="nav-link">
               {t('nav.earlyAccess')}
             </button>
