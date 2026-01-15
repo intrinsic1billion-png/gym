@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Move, Shield, Minimize2 } from 'lucide-react';
 
 const AboutSection = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -31,9 +31,42 @@ const AboutSection = () => {
           <h2 className="home-about-title">ABOUT RAZE</h2>
           <p className="home-about-subtitle">Built by Discipline. Made to Move.</p>
           
-          <p className="home-about-text">
-            Most sportswear is designed to look good — not to move properly. As gymnasts, we created RAZE for athletes who need clothing that moves with them, not against them.
-          </p>
+          <div className="home-about-text">
+            <p>
+              Most sportswear is designed to look good — not to perform under real pressure.
+            </p>
+            <p>
+              In gymnastics, every routine demands full range movement, control, and comfort. RAZE was created by gymnasts who got tired of clothing that rides up, restricts motion, or feels wrong at the worst moment.
+            </p>
+            <p>
+              We build minimalist performance wear that moves with you — not against you.
+            </p>
+          </div>
+
+          {/* What We Stand For - Mini Feature Row */}
+          <div className="home-about-features">
+            <div className="home-about-feature">
+              <Move size={20} className="home-about-feature-icon" />
+              <div className="home-about-feature-text">
+                <span className="home-about-feature-title">Full-range mobility</span>
+                <span className="home-about-feature-desc">Made for dynamic movement</span>
+              </div>
+            </div>
+            <div className="home-about-feature">
+              <Shield size={20} className="home-about-feature-icon" />
+              <div className="home-about-feature-text">
+                <span className="home-about-feature-title">Secure fit</span>
+                <span className="home-about-feature-desc">Stays in place during routines</span>
+              </div>
+            </div>
+            <div className="home-about-feature">
+              <Minimize2 size={20} className="home-about-feature-icon" />
+              <div className="home-about-feature-text">
+                <span className="home-about-feature-title">Minimal design</span>
+                <span className="home-about-feature-desc">No distractions, just performance</span>
+              </div>
+            </div>
+          </div>
           
           <Link to="/about" className="home-about-link">
             Learn More <ArrowRight size={18} />
@@ -48,7 +81,7 @@ const AboutSection = () => {
               alt="Male gymnast training"
               className="home-about-image"
             />
-            <span className="home-about-image-label">MAG</span>
+            <span className="home-about-image-label home-about-image-label-subtle">MAG</span>
           </div>
           <div className={`home-about-image-wrapper ${isVisible ? 'animate-fade-in-up delay-200' : ''}`}>
             <img 
@@ -56,7 +89,7 @@ const AboutSection = () => {
               alt="Female gymnast training"
               className="home-about-image"
             />
-            <span className="home-about-image-label">WAG</span>
+            <span className="home-about-image-label home-about-image-label-subtle">WAG</span>
           </div>
         </div>
       </div>
