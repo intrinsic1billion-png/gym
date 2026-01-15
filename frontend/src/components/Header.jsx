@@ -165,9 +165,15 @@ const Header = () => {
             <Link to="/products" className="nav-link" onClick={() => setIsMenuOpen(false)}>
               {t('nav.products')}
             </Link>
-            <button onClick={() => scrollToSection('about')} className="nav-link">
-              About Us
-            </button>
+            <div className="mobile-nav-group">
+              <span className="mobile-nav-group-title">About Us</span>
+              <button onClick={() => scrollToSection('about')} className="nav-link mobile-nav-subitem">
+                About RAZE
+              </button>
+              <Link to="/from-our-customers" className="nav-link mobile-nav-subitem" onClick={() => setIsMenuOpen(false)}>
+                From our customers
+              </Link>
+            </div>
             <button onClick={() => scrollToSection('newsletter')} className="nav-link">
               {t('nav.earlyAccess')}
             </button>
