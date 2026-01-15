@@ -8052,10 +8052,10 @@ body {
   /* X Close Button - Mobile */
   .modal-header-actions .modal-close {
     position: static;
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    min-height: 32px;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
     background: rgba(0, 0, 0, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: #fff;
@@ -8070,8 +8070,8 @@ body {
   }
   
   .modal-header-actions .modal-close svg {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     stroke-width: 2.5;
   }
 
