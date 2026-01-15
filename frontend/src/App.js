@@ -9,6 +9,7 @@ import Hero from "./components/Hero";
 import TrustBar from "./components/TrustBar";
 import WaitlistBanner from "./components/WaitlistBanner";
 import ProductCategories from "./components/ProductCategories";
+import AboutSection from "./components/AboutSection";
 import Features from "./components/Features";
 import Reviews from "./components/Reviews";
 import Newsletter from "./components/Newsletter";
